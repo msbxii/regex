@@ -163,6 +163,12 @@ public class Regex {
             String rightRegex = regex.substring(regex.lastIndexOf('|') + 1,
                     regex.lastIndexOf(']'));
             String remainderRegex = regex.substring(regex.lastIndexOf(']') + 1);
+            if (leftRegex.length() == 0 || rightRegex.length() == 0 && remainderRegex.length() > 0) {
+                if (remainderRegex.charAt(0) == '+') {
+                    // if we have E+ as one option, convert the plus to star
+                    remainderRegex = '*' + remainderRegex.substring(1);
+                }
+            }
             return matches(leftRegex + remainderRegex, toMatch)
                 || matches(rightRegex + remainderRegex, toMatch);
         }
