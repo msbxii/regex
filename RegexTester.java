@@ -96,6 +96,6 @@ public class RegexTester {
             assertEquals("bb", simpleRegex.replaceMatching("aaaaaa", "b"));
 
             simpleRegex = new Regex("ab+");
-            assertEquals("fbf", simpleRegex.replaceMatching("abababbabab"));
+            assertEquals("fbf", simpleRegex.replaceMatching("abababbabab", "f"));
         }
 }
