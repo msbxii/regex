@@ -80,6 +80,10 @@ public class Regex {
                 return isValidSyntax(regex.substring(1), startPos + 1);
             }
         } else if (regex.charAt(0) == '[') {
+            // make sure we have a whole [|] device
+            if ( regex.indexOf('|') == -1 ) return startPos;
+            if ( regex.indexOf(']') == -1 ) return startPos;
+
             int off = 0;
             if ( (off = isValidSyntax(regex.substring(1, regex.indexOf('|')), startPos + 1)) >= 0 )
                 return off;
