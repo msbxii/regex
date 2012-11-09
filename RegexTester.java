@@ -172,4 +172,47 @@ public class RegexTester {
             simpleRegex.initialize("aaa");
             assertEquals("bba", simpleRegex.replaceMatching("aaaaaaa", "b"));
         }
+
+    // bad regexes
+    @Test (expected = ParseException.class)
+        public void badRegexChar() throws ParseException {
+            Regex simpleRegex = new Regex();
+            simpleRegex.initialize("\n");
+        }
+
+    @Test (expected = ParseException.class)
+        public void badRegex1() throws ParseException {
+            Regex simpleRegex = new Regex();
+            simpleRegex.initialize("[");
+        }
+
+    @Test (expected = ParseException.class)
+        public void badRegex2() throws ParseException {
+            Regex simpleRegex = new Regex();
+            simpleRegex.initialize("a[");
+        }
+
+    @Test (expected = ParseException.class)
+        public void badRegex3() throws ParseException {
+            Regex simpleRegex = new Regex();
+            simpleRegex.initialize("+");
+        }
+
+    @Test (expected = ParseException.class)
+        public void badRegex4() throws ParseException {
+            Regex simpleRegex = new Regex();
+            simpleRegex.initialize("*");
+        }
+
+    @Test (expected = ParseException.class)
+        public void badRegex5() throws ParseException {
+            Regex simpleRegex = new Regex();
+            simpleRegex.initialize("a*+");
+        }
+
+    @Test (expected = ParseException.class)
+        public void badRegex6() throws ParseException {
+            Regex simpleRegex = new Regex();
+            simpleRegex.initialize("a+*");
+        }
 }
