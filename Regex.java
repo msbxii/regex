@@ -32,20 +32,33 @@
  *
  * @author Nathan
  */
+import java.text.ParseException;
+
 public class Regex {
 
     private String regex;
+    private boolean initialized;
+
+    public Regex() {
+        regex = null;
+    }
+
+    public Regex(String regex) throws ParseException {
+        initialize(regex);
+    }
 
     /**
      * Instantiates a Regex that matches against the regex given in the parameter.
      * Checks to ensure that the syntax is valid, and throws an IllegalArgumentException if not.
      */
-    public Regex(String regex) {
-        if (isValidSyntax(regex)) {
+    public void initialize(String regex) throws ParseException {
+        int offset = isValidSyntax(regex, 0);
+        if (offset == -1) {
             this.regex = regex;
+            initialized = true;
         } else {
-            throw new IllegalArgumentException("Syntax Error in regex:  "
-                    + regex + ".");
+            throw new ParseException("Syntax Error in regex:  "
+                    + regex + ".", offset);
         }
     }
 
@@ -55,23 +68,28 @@ public class Regex {
      * This method should return true if and only if the regex it receives as a parameter
      * is a valid representation of a regular expression.
      */
-    private boolean isValidSyntax(String regex) {
+    private int isValidSyntax(String regex, int startPos) {
         if (regex.length() == 0) {
-            return true;
+            return -1;
         } else if (Character.isLetterOrDigit(regex.charAt(0))
                 || regex.charAt(0) == '.') {
             if (regex.length() > 1
                     && (regex.charAt(1) == '+' || regex.charAt(1) == '*')) {
-                return isValidSyntax(regex.substring(2));
+                return isValidSyntax(regex.substring(2), startPos + 2);
             } else {
-                return isValidSyntax(regex.substring(1));
+                return isValidSyntax(regex.substring(1), startPos + 1);
             }
         } else if (regex.charAt(0) == '[') {
-            return (isValidSyntax(regex.substring(1, regex.indexOf('|')))
-                    && isValidSyntax(regex.substring(regex.indexOf('|') + 1, regex.lastIndexOf(']')))
-                    && isValidSyntax("l" + regex.substring(regex.lastIndexOf(']') + 1)));
+            int off = 0;
+            if ( (off = isValidSyntax(regex.substring(1, regex.indexOf('|')), startPos + 1)) >= 0 )
+                return off;
+            if ( (off = isValidSyntax(regex.substring(regex.indexOf('|') + 1, regex.lastIndexOf(']')), startPos + regex.indexOf('|') + 1)) >= 0 )
+                return off;
+            if ( (off = isValidSyntax("l" + regex.substring(regex.lastIndexOf(']') + 1), startPos + regex.lastIndexOf(']') + 1)) >= 0)
+                return off;
+            return -1;
         } else {
-            return false;
+            return startPos;
         }
     }
 
@@ -81,6 +99,7 @@ public class Regex {
      * @param toMatch the string to match against
      */
     public boolean matches(String toMatch) {
+        if (!initialized) return false;
         return matches(this.regex, toMatch);
     }
 
@@ -156,12 +175,14 @@ public class Regex {
      * @return the substring that matches this regex, or null if no substring matches.
      */
     public String partialMatch(String toMatch) {
+        if (!initialized) return null;
         // start from the beginning, and test every substring from beginning to end
         String largestMatch = "";
         boolean match = false;
         for (int i = 0; i < toMatch.length(); i++) {
-            for (int j = i; j < toMatch.length(); j++) {
+            for (int j = i; j <= toMatch.length(); j++) {
                 if (matches(toMatch.substring(i, j))) {
+                    match = true;
                     if (j - i > largestMatch.length()) {
                         largestMatch = toMatch.substring(i, j);
                     }
@@ -181,6 +202,8 @@ public class Regex {
      * @return the new string, with the text in toMatch that matches this regex replaced by toReplace.
      */
     public String replaceMatching(String toMatch, String toReplace) {
+        if (!initialized) return toReplace;
+
         String partialMatch = partialMatch(toMatch);
         return toMatch.replace(partialMatch, toReplace);
     }
