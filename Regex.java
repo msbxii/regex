@@ -69,7 +69,7 @@ public class Regex {
         } else if (regex.charAt(0) == '[') {
             return (isValidSyntax(regex.substring(1, regex.indexOf('|')))
                     && isValidSyntax(regex.substring(regex.indexOf('|') + 1, regex.lastIndexOf(']')))
-                    && isValidSyntax(regex.substring(regex.lastIndexOf(']') + 1)));
+                    && isValidSyntax("l" + regex.substring(regex.lastIndexOf(']') + 1)));
         } else {
             return false;
         }
@@ -101,8 +101,8 @@ public class Regex {
         } else if (Character.isLetterOrDigit(regex.charAt(0))) {
             // if we have a literal, we first check to see if it's modified by a * or +
             if (regex.length() > 1 && regex.charAt(1) == '*') {
-                // if there's a star, we check to see if the character matches
                 if (toMatch.length() > 0 && toMatch.charAt(0) == regex.charAt(0)) {
+                // if there's a star, we check to see if the character matches
                     // if it does, strip it off and leave the star on.
                     return matches(regex, toMatch.substring(1));
                 } else {
@@ -111,6 +111,9 @@ public class Regex {
                 }
             } else if (regex.length() > 1 && regex.charAt(1) == '+') {
                 // plusses work much like stars, except that we can't have no match
+                if (toMatch.length() == 0) {
+                    return false;
+                }
                 if (toMatch.charAt(0) == regex.charAt(0)) {
                     // they're so much like stars that after one match, we replace it with a star.
                     return matches(regex.charAt(0) + "*" + regex.substring(2),
@@ -123,12 +126,14 @@ public class Regex {
                     && matches(regex.substring(1), toMatch.substring(1));
             }
         } else if (regex.charAt(0) == '.') {
-            if (regex.charAt(1) == '*') {
-                // .* matches everything
-                return true;
-            } else if (regex.charAt(1) == '+') {
-                // .+ matches everything, if there's anything left to match
-                return toMatch.length() > 1;
+            if (regex.length() > 1) {
+                if (regex.charAt(1) == '*') {
+                    // .* matches everything
+                    return true;
+                } else if (regex.charAt(1) == '+') {
+                    // .+ matches everything, if there's anything left to match
+                    return toMatch.length() > 1;
+                }
             } else {
                 // we'll match just a single character this way.
                 return matches(regex.substring(1), toMatch.substring(1));
@@ -152,12 +157,18 @@ public class Regex {
      */
     public String partialMatch(String toMatch) {
         // start from the beginning, and test every substring from beginning to end
+        String largestMatch = "";
+        boolean match = false;
         for (int i = 0; i < toMatch.length(); i++) {
-            if (matches(toMatch.substring(i))) {
-                return toMatch.substring(i);
+            for (int j = i; j < toMatch.length(); j++) {
+                if (matches(toMatch.substring(i, j))) {
+                    if (j - i > largestMatch.length()) {
+                        largestMatch = toMatch.substring(i, j);
+                    }
+                }
             }
         }
-        return null;
+        return (match) ? largestMatch : null;
     }
 
 
