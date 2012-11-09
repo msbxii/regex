@@ -204,7 +204,10 @@ public class Regex {
     public String replaceMatching(String toMatch, String toReplace) {
         if (!initialized) return toReplace;
 
-        String partialMatch = partialMatch(toMatch);
-        return toMatch.replace(partialMatch, toReplace);
+        while (partialMatch(toMatch) != null) {
+            String partialMatch = partialMatch(toMatch);
+            toMatch = toMatch.replace(partialMatch, toReplace);
+        }
+        return toMatch;
     }
 }
